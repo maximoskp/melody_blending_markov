@@ -90,12 +90,12 @@ for i in range(4):
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
     # make target features
-    target_features = fbl.blend_single_feature(df, hf, i)
+    target_features = fbl.blend_single_feature(hf, df, i)
     evoSession = evo.EvoSession( deut_file, han_file, target_features, target_markov, nPop=20, nGen=20, print_gens=True )
     # write to midi files
     fef.write_stream_to_midi(evoSession.best_individual.stream, appendToPath=folder_name, fileName='one_h_into_d_'+str(i)+'.mid')
     # write to log file
-    log_file.write('one_d_into_h_'+str(i)+' ================== \n')
+    log_file.write('one_h_into_d_'+str(i)+' ================== \n')
     log_file.write('target features: ' + str(evoSession.target_features) + '\n')
     log_file.write('best features: ' + str(evoSession.best_individual.features) + '\n')
 # close log file

@@ -10,6 +10,7 @@ import numpy as np
 import music21 as m21
 import copy
 import math
+import time
 import MBL_music_processing_functions as mpf
 import MBL_melody_features_functions as mff
 
@@ -193,15 +194,22 @@ class EvoSession:
         for f in offs:
             # quantise to 16th
             new_offsets.append( math.floor( 4.0*a*f )/4.0 )
+        '''
         # compute durations
         for f in durs:
             # quantise to 16th
             new_durations.append( max( [math.floor( 4.0*a*f )/4.0, 0.25] ))
+        '''
         # keep unique offsets through numpy
         new_offsets = np.array( new_offsets )
-        new_durations = np.array( new_durations )
+        # new_durations = np.array( new_durations )
         new_offsets, unidxs = np.unique( new_offsets, return_index=True )
-        new_durations = new_durations[ unidxs ]
+        # new_durations = new_durations[ unidxs ]
+        # compute durations based on offset - in m21 consecutive durations beat offets...
+        # make expanded offsets by adding the measure length as the last element
+        tmp_expanded = np.append( new_offsets, d_to )
+        # compute durations as differences of expanded offsets
+        new_durations = np.diff( tmp_expanded )
         return new_offsets, new_durations
     # end map_offsets_to_duration
     def fit_exchange_rhythm_to_pitches(self, m1, m2):
@@ -222,8 +230,8 @@ class EvoSession:
         n1_durations = [n.duration.quarterLength for n in n1]
         n2_durations = [n.duration.quarterLength for n in n2]
         # pitches
-        n1_pitches = [n.pitches for n in n1]
-        n2_pitches = [n.pitches for n in n2]
+        n1_pitches = [n.pitch for n in n1]
+        n2_pitches = [n.pitch for n in n2]
         # get mapped offsets
         n1_new_offsets, n1_new_durations = self.map_offsets_and_durations( n2_offsets, n2_durations, m2_dur, m1_dur )
         n2_new_offsets, n2_new_durations = self.map_offsets_and_durations( n1_offsets, n1_durations, m1_dur, m2_dur )
@@ -232,44 +240,24 @@ class EvoSession:
         n1_new_durations = self.map_offsets_to_duration( n2_durations, m2_dur, m1_dur )
         n2_new_durations = self.map_offsets_to_duration( n1_durations, m1_dur, m2_dur )
         '''
-        # run through every note in mr and circularly place pitches of mp
-        # m = copy.deepcopy(mr)
-        # put new offsets and durations in n1
-        # find how many notes we're going to keep
-        # n1_notes_to_keep = min( [len(n1_new_offsets), len(n1)] )
-        for i in range( len(n1_new_offsets) ):
-            # change offset and duration of note
-            if i < len( n1 ):
-                n1[ i ].offset = n1_new_offsets[ i ]
-                n1[ i ].duration.quarterLength = max( [n1_new_durations[ i ], 0.25])
-            else:
-                # add a new note
-                new_note = m21.note.Note( n1[ i%len(n1) ].pitch )
-                new_note.offset = n1_new_offsets[ i ]
-                new_note.duration.quarterLength = max( [n1_new_durations[ i ], 0.25])
-                m1.append( new_note )
-        # if n1 has more notes, remove them
-        if len( n1 ) > len(n1_new_offsets):
-            for i in range(len(n1_new_offsets), len(n1), 1):
-                m1.remove( n1[-1] )
-        # put new offsets and durations in n2
-        # find how many notes we're going to keep
-        # n2_notes_to_keep = min( [len(n2_new_offsets), len(m2.notes)] )
-        for i in range( len(n2_new_offsets) ):
-            # change offset and duration of note
-            if i < len( m2.notes ):
-                m2.notes[ i ].offset = n2_new_offsets[ i ]
-                m2.notes[ i ].duration.quarterLength = max( [n2_new_durations[ i ], 0.25] )
-            else:
-                # add a new note
-                new_note = m21.note.Note( m2.notes[ i%len(m2.notes) ].pitch )
-                new_note.offset = n2_new_offsets[ i ]
-                new_note.duration.quarterLength = max( [n2_new_durations[ i ], 0.25])
-                m2.append( new_note )
-        # if n2 has more notes, remove them
-        if len( m2.notes ) > len(n2_new_offsets):
-            for i in range(len(n2_new_offsets), len(m2.notes), 1):
-                m2.remove( m2.notes[-1] )
+        # remove all notes from m1
+        for n in m1.notes:
+            m1.remove(n)
+        # create and append new pitches to m1
+        for i in range( len( n1_new_offsets ) ):
+            tmp_note = m21.note.Note( n1_pitches[ i%len( n1_pitches ) ] )
+            tmp_note.offset = n1_new_offsets[i]
+            tmp_note.duration.quarterLength = n1_new_durations[i]
+            m1.append( tmp_note )
+        # remove all notes from m2
+        for n in m2.notes:
+            m2.remove(n)
+        # create and append new pitches to m1
+        for i in range( len( n2_new_offsets ) ):
+            tmp_note = m21.note.Note( n2_pitches[ i%len( n2_pitches ) ] )
+            tmp_note.offset = n2_new_offsets[i]
+            tmp_note.duration.quarterLength = n2_new_durations[i]
+            m2.append( tmp_note )
         # return m
     # end fit_exchange_rhythm_to_pitches
     def bar_rhythm_exchange(self, p1, p2):
