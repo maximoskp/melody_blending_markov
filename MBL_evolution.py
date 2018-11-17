@@ -29,7 +29,7 @@ class Melody:
         ''' the input np array of target features and np matrix target markov matrix '''
         v1 = np.linalg.norm( f - self.features )
         v2 = np.linalg.norm( m - self.markov )
-        self.fitness = 0.8*v1 + 0.2*v2
+        self.fitness = 0.9*v1 + 0.1*v2
 # end class Melody
 
 class EvoSession:

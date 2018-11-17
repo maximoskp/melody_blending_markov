@@ -19,6 +19,9 @@ import MBL_feature_blending_functions as fbl
 deut_file = 'melodies/deut3961.krn';
 han_file = 'melodies/han0987.krn';
 session_folder = 'deut3961_han0987/'
+# evo constants
+nGens = 100
+nPop = 50
 
 # vvvvv WE ACTUALLY NEED ALL THESE FOR EXTRACTING INTITIAL FEATURES vvvvv
 # vvvvv TO FORM THE FINAL "BLENDED" TARGET FEATURES vvvvv
@@ -76,7 +79,7 @@ for i in range(4):
         os.makedirs(folder_name)
     # make target features
     target_features = fbl.blend_single_feature(df, hf, i)
-    evoSession = evo.EvoSession( deut_file, han_file, target_features, target_markov, nPop=20, nGen=20, print_gens=True )
+    evoSession = evo.EvoSession( deut_file, han_file, target_features, target_markov, nPop=nPop, nGen=nGens, print_gens=True )
     # write to midi files
     fef.write_stream_to_midi(evoSession.best_individual.stream, appendToPath=folder_name, fileName='one_d_into_h_'+str(i)+'.mid')
     # write to log file
@@ -92,7 +95,7 @@ for i in range(4):
         os.makedirs(folder_name)
     # make target features
     target_features = fbl.blend_single_feature(hf, df, i)
-    evoSession = evo.EvoSession( deut_file, han_file, target_features, target_markov, nPop=20, nGen=20, print_gens=True )
+    evoSession = evo.EvoSession( deut_file, han_file, target_features, target_markov, nPop=nPop, nGen=nGens, print_gens=True )
     # write to midi files
     fef.write_stream_to_midi(evoSession.best_individual.stream, appendToPath=folder_name, fileName='one_h_into_d_'+str(i)+'.mid')
     # write to log file
