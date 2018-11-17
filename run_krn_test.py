@@ -16,8 +16,9 @@ import MP_file_export_functions as fef
 import MBL_feature_blending_functions as fbl
 
 # use examples of altdeut1 and han melodies
-deut_file = 'melodies/deut3916.krn';
+deut_file = 'melodies/deut3961.krn';
 han_file = 'melodies/han0987.krn';
+session_folder = 'deut3961_han0987/'
 
 # vvvvv WE ACTUALLY NEED ALL THESE FOR EXTRACTING INTITIAL FEATURES vvvvv
 # vvvvv TO FORM THE FINAL "BLENDED" TARGET FEATURES vvvvv
@@ -50,11 +51,11 @@ dm = mff.compute_melody_markov_transitions(d_fix)
 hm = mff.compute_melody_markov_transitions(h_fix)
 
 # make base folder based on names
-base_name = 'results/deut3916_han0987/'
+base_name = 'results/'+session_folder
 
 # first write inputs to midi
-fef.write_stream_to_midi(ds, appendToPath='results/deut3916_han0987/', fileName='input1.mid')
-fef.write_stream_to_midi(hs, appendToPath='results/deut3916_han0987/', fileName='input2.mid')
+fef.write_stream_to_midi(ds, appendToPath=base_name, fileName='input1.mid')
+fef.write_stream_to_midi(hs, appendToPath=base_name, fileName='input2.mid')
 
 # open the log file
 log_file = open(base_name + "Output.txt", "w")
@@ -69,7 +70,7 @@ target_markov = ( dm + hm )/2.0
 # all scenarios for deut into han
 for i in range(4):
     print('deut into han: ', i)
-    folder_name = 'results/deut3916_han0987/blends/'
+    folder_name = base_name+'blends/'
     # check if folder exists, else make it
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
@@ -85,7 +86,7 @@ for i in range(4):
 # all scenarios for han into deut
 for i in range(4):
     print('han into deut: ', i)
-    folder_name = 'results/deut3916_han0987/blends/'
+    folder_name = base_name+'blends/'
     # check if folder exists, else make it
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
